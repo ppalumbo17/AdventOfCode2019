@@ -33,6 +33,9 @@ class Point:
 
   def printStr(self):
     return str(self.x) + ', ' + str(self.y)
+  
+  def difference(self, p):
+    return abs(self.x - p.getX()) + abs(self.y - p.getY())
 
 def move(cp, action):
   direction = action[0]
@@ -48,26 +51,39 @@ def move(cp, action):
   return cp
 
 def createWireSet(input):
-  wireMap = set()
+  wireMap = {}
   currentPoint = Point(0, 0)
+  steps = 0
   for route in input:
     newPoint = copy.copy(currentPoint)
     newPoint = move(newPoint, route)
+    print('New', newPoint.printStr(), 'Curr', currentPoint.printStr())
+    distance = currentPoint.difference(newPoint)
+    yValue = True if currentPoint.getX() == newPoint.getX() else False
+    for step in range(0, distance):
+      if yValue:
+        p = (currentPoint.getX(), currentPoint.getY() + step)
+      else:
+        p = (currentPoint.getX() + step, currentPoint.getY())
+      if p not in wireMap:
+        wireMap[p] = steps
+      steps += 1
+      # print('Steps', steps)
     # wireMap.add((currentPoint.getX(), currentPoint.getY()))
-    wireMap.update(findAllPointsBetween(currentPoint, newPoint))
+    # wireMap.update(findAllPointsBetween(currentPoint, newPoint))
     currentPoint = copy.copy(newPoint)
   return wireMap
 
 def findAllPointsBetween(p1, p2):
-  print('P1', p1.printStr(), 'P2', p2.printStr())
+  # print('P1', p1.printStr(), 'P2', p2.printStr())
   points = set()
   xValue = True if p1.getX() == p2.getX() else False
   lesser = p1.getX() if p1.getX() < p2.getX() else p2.getX() if not xValue else p1.getY() if p1.getY() < p2.getY() else p2.getY()
   # lesser =
   greater = p1.getX() if p1.getX() > p2.getX() else p2.getX() if not xValue else p1.getY() if p1.getY() > p2.getY() else p2.getY()
   # greater =
-  print('Lesser', lesser)
-  print('Greater', greater)
+  # print('Lesser', lesser)
+  # print('Greater', greater)
   points.add((p1.getX(), p1.getY()))
   points.add((p2.getX(), p2.getY()))
   if xValue:
@@ -76,23 +92,28 @@ def findAllPointsBetween(p1, p2):
   else:
     for x in range(lesser, greater):
       points.add((x, p1.getY()))
-  print('Points are', points)
+  # print('Points are', points)
   return points
 
-def getMinDistance(input):
+def getMinDistance(d1, d2, s1):
   minDistance = sys.maxsize
-  for tup in input:
-    currentDistance = math.fabs(tup[0]) + math.fabs(tup[1])
+  for tup in s1:
+    currentDistance =  d1.get(tup) + d2.get(tup)
+    print('Tup', tup, 'T1', d1.get(tup), 'T2', d2.get(tup), 'Curr', currentDistance)
     minDistance = min(currentDistance, minDistance)
   return minDistance
+  # for tup in input:
+  #   currentDistance = math.fabs(tup[0]) + math.fabs(tup[1])
+  #   minDistance = min(currentDistance, minDistance)
+  # return minDistance
 
 
 # print(createWireSet(inputData[0]))
 s1 = createWireSet(inputData[0])
-print('S1', s1)
+# print('S1', s1)
 s2 = createWireSet(inputData[1])
-print('S2', s2)
-s3 = s1.intersection(s2)
+# print('S2', s2)
+s3 = set(s1.keys()) & set(s2.keys())
 s3.remove((0, 0))
-print('S3', s3)
-print(getMinDistance(s3))
+# print('S3', s3)
+print(getMinDistance(s1, s2, s3))
